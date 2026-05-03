@@ -74,7 +74,7 @@ Feel free to fork this repository and submit a pull request.
 ---
 
 👨‍💻 Author
-Name  : Jay Rohit
+Name  : Jay Rohit  | 
 Email : jayrohit0310@gmail.com
 
 ---
