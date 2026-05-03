@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Voter Registration{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="/static/register.css">
+{% endblock %}
+
+{% block content %}
+<main class="main-content-wrapper" style="min-height: calc(100vh - 180px); display: flex; justify-content: center; align-items: center;">
+<div style="width: 100%; display: flex; justify-content: center;">
+<div class="register-box">
+    <i class="fas fa-user-plus"></i>
+    <h2>Voter Registration</h2>
+
+    <form method="POST" action="/register" onsubmit="return validateRegisterForm()">
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="text" name="voter_id" placeholder="Voter ID" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <button type="submit">Register</button>
+    </form>
+
+    <p>Already registered? <a href="/login">Login</a></p>
+</div>
+</div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/app.js"></script>
+{% endblock %}

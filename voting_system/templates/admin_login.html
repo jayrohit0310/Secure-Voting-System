@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="/static/login.css">
+    <style>
+        .admin-box { border: 2px solid #00f2fe; }
+        .admin-header { color: #00f2fe; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content-wrapper" style="min-height: calc(100vh - 180px); display: flex; justify-content: center; align-items: center;">
+<div class="login-container">
+    <div class="login-box admin-box">
+        <i class="fas fa-shield-alt" style="font-size: 3rem; color: #00f2fe; margin-bottom: 20px;"></i>
+        <h2 class="admin-header">Admin Portal</h2>
+
+        <form method="POST" action="/admin_login">
+            <div class="input-group">
+                <input type="text" name="admin_id" id="login_admin_id" placeholder="Admin ID" required>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="password" id="login_password" placeholder="Password" required>
+            </div>
+
+            <button type="submit" style="background: linear-gradient(135deg, #00c6ff, #0072ff);">Secure Login</button>
+        </form>
+
+        <p class="register-text">
+            <a href="/login"><i class="fas fa-arrow-left"></i> Back to Voter Login</a>
+        </p>
+        
+        <!-- Error handling alert matching backend -->
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.has('error') && urlParams.get('error') === 'invalid') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: 'Invalid Admin Credentials',
+                    background: '#ffffff',
+                    color: '#1e293b'
+                });
+            }
+        </script>
+    </div>
+</div>
+</main>
+{% endblock %}

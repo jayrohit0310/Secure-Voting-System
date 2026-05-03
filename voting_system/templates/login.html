@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Voter Login{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="/static/login.css">
+{% endblock %}
+
+{% block content %}
+<main class="main-content-wrapper" style="min-height: calc(100vh - 180px); display: flex; justify-content: center; align-items: center;">
+<div class="login-container">
+    <div class="login-box">
+        <i class="fas fa-user-lock"></i>
+        <h2>Voter Login</h2>
+
+        {% if not otp_sent %}
+        <form method="POST" action="/login">
+            <input type="hidden" name="action" value="send_otp">
+            <div class="input-group">
+                <input type="email" name="email" id="login_email" placeholder="Registered Email" required>
+            </div>
+            <button type="submit">Send OTP</button>
+        </form>
+        {% else %}
+        <form method="POST" action="/login">
+            <input type="hidden" name="action" value="verify_otp">
+            <input type="hidden" name="email" value="{{ email }}">
+            
+            <p style="color: #4facfe; margin-bottom: 15px; font-size: 0.9rem;">OTP sent to {{ email }}</p>
+            <div class="input-group">
+                <input type="text" name="otp" id="login_otp" placeholder="Enter 6-digit OTP" required maxlength="6" pattern="\d{6}">
+            </div>
+            <button type="submit">Verify & Login</button>
+        </form>
+        <script>
+            Swal.fire({
+                icon: 'info',
+                title: 'Simulated OTP',
+                text: 'Your OTP is {{ otp }}',
+                background: '#ffffff',
+                color: '#1e293b',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000
+            });
+        </script>
+        {% endif %}
+
+        {% if error %}
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: '{{ error }}',
+                background: '#ffffff',
+                color: '#1e293b'
+            });
+        </script>
+        {% endif %}
+        <p class="register-text">
+            New user? <a href="/register">Register here</a>
+        </p>
+    </div>
+</div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/app.js"></script>
+{% endblock %}

@@ -1,0 +1,25 @@
+# Secure Voting System
+
+SecureTech Voting
+[Home](http://127.0.0.1:5000/)
+[Admin](http://127.0.0.1:5000/admin)
+[Vote](http://127.0.0.1:5000/vote)
+[Live Results](http://127.0.0.1:5000/result)
+[Login](http://127.0.0.1:5000/login)
+[Register](http://127.0.0.1:5000/register)
+
+## The Future ofDemocratic Choice
+Experience the next generation of secure, fast, and automated digital voting. Our platform eliminates manual counting and guarantees absolute transparency through state-of-the-art encryption combined with AI verification protocols.
+
+### Why choose our system?
+
+#### Bank-Level Security
+Advanced cryptographic protocols encrypt your choices instantly.
+
+#### Lightning Fast
+No queues. No waiting. Cast your vote from anywhere globally.
+
+#### AI Verification
+Cutting edge facial recognition ensures true one-person-one-vote.
+[Initialize Secure Vote Process](http://127.0.0.1:5000/start_voting)
+Engineered With | 24IT081 & 24IT085

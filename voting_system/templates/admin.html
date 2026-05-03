@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* Scoped Admin specific styles */
+.admin-layout {
+    display: flex;
+    min-height: calc(100vh - 140px); /* Adjust based on header/footer */
+    width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background: #ffffff;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .logo-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 50px;
+    padding-left: 10px;
+}
+
+.sidebar .logo-box i {
+    font-size: 28px;
+    color: #3b82f6;
+}
+
+.sidebar .logo-box p {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.sidebar .nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.sidebar .nav-links a {
+    text-decoration: none;
+    color: #475569;
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s;
+}
+
+.sidebar .nav-links a:hover, .sidebar .nav-links a.active {
+    background: rgba(59, 130, 246, 0.08);
+    color: #2563eb;
+    border-left: 4px solid #2563eb;
+}
+
+.sidebar .nav-links a i {
+    font-size: 1.2rem;
+    width: 25px;
+}
+
+.sidebar .logout-container {
+    margin-top: auto;
+}
+
+/* Main Content */
+.admin-main-content {
+    flex: 1;
+    padding: 40px 50px;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.top-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.admin-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #ffffff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.admin-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Stat Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 20px;
+    padding: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.stat-details h3 {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.stat-details p {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+    background: rgba(59, 130, 246, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    color: #3b82f6;
+}
+
+/* Chart Section */
+.chart-section {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+}
+
+.chart-header {
+    margin-bottom: 25px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.chart-wrapper {
+    width: 100%;
+    height: 400px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content-wrapper admin-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo-box">
+            <i class="fas fa-vote-yea"></i>
+            <p>AdminDash</p>
+        </div>
+
+        <div class="nav-links">
+            <a href="/" ><i class="fas fa-home"></i> User App Mode</a>
+            <a href="/admin" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a href="/result"><i class="fas fa-flag-checkered"></i> Full Results</a>
+        </div>
+
+        <div class="logout-container">
+            <a href="/logout" class="nav-links" style="text-decoration:none; padding: 15px 20px; color:#ff6b6b; font-weight:600;"><i class="fas fa-power-off"></i> Force Exit</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        <div class="top-header">
+            <h1>Command Center</h1>
+            <div class="admin-profile">
+                <span style="font-weight:500;">System Admin</span>
+                <i class="fas fa-user-shield" style="font-size:24px; color:#00f2fe;"></i>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div style="background: #ffffff; padding: 20px 30px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+            <div>
+                <h3 style="margin-bottom: 5px; color: #1e293b;">System Controls</h3>
+                <p style="color: #64748b; font-size: 0.95rem; margin: 0;">Visibility status: 
+                    <strong style="color: {% if declared %}#2563eb{% else %}#ef4444{% endif %}; font-size: 1.1rem;">
+                        {% if declared %}Declared / Public{% else %}Hidden From Users{% endif %}
+                    </strong>
+                </p>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <form method="POST" action="/admin/toggle_results" style="margin: 0;">
+                    {% if declared %}
+                        <button type="submit" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; border: 1px solid #2563eb; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                            <i class="fas fa-eye-slash"></i> Hide Results
+                        </button>
+                    {% else %}
+                        <button type="submit" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; border: 1px solid #2563eb; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                            <i class="fas fa-bullhorn"></i> Declare Results
+                        </button>
+                    {% endif %}
+                </form>
+                <form method="POST" action="/admin/reset_votes" id="resetVotesForm" style="margin: 0;">
+                    <button type="button" onclick="confirmReset()" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <i class="fas fa-trash-alt"></i> Reset All Votes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Candidate Management -->
+        <div style="background: #ffffff; padding: 20px 30px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+            <h3 style="margin-bottom: 20px; color: #1e293b;"><i class="fas fa-users-cog"></i> Candidate Management</h3>
+            
+            <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                <!-- Add Candidate Form -->
+                <div style="flex: 1; min-width: 300px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.04);">
+                    <h4 style="margin-bottom: 15px; color: #3b82f6;">Add New Candidate</h4>
+                    <form method="POST" action="/admin/add_candidate" style="display: flex; flex-direction: column; gap: 12px; margin: 0;">
+                        <input type="text" name="name" placeholder="Candidate Name" required style="padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
+                        <input type="text" name="party" placeholder="Party / Title" required style="padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
+                        <input type="text" name="image_url" placeholder="Image Path (e.g. /static/modi.jpg)" style="padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
+                        <button type="submit" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.3s;">+ Add Candidate</button>
+                    </form>
+                </div>
+                
+                <!-- Current Candidates List -->
+                <div style="flex: 2; min-width: 300px;">
+                    <h4 style="margin-bottom: 15px; color: #475569;">Active Candidates</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        {% for candidate in candidates %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid rgba(0,0,0,0.04);">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <img src="{{ candidate[3] }}" alt="img" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0;">
+                                <div>
+                                    <strong style="color: #1e293b; display: block;">{{ candidate[1] }}</strong>
+                                    <span style="color: #64748b; font-size: 0.85rem;">{{ candidate[2] }}</span>
+                                </div>
+                            </div>
+                            <form method="POST" action="/admin/delete_candidate" style="margin: 0;">
+                                <input type="hidden" name="candidate_id" value="{{ candidate[0] }}">
+                                <button type="submit" style="background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer;" title="Delete"><i class="fas fa-times-circle"></i></button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <p style="color: #94a3b8;">No candidates found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-details">
+                    <h3>Total Registered Voters</h3>
+                    <p>{{ total_users }}</p>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-details">
+                    <h3>Total Votes Cast</h3>
+                    <p>{{ total_votes }}</p>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-details">
+                    <h3>Voter Turnout</h3>
+                    <p>
+                        {% if total_users > 0 %}
+                            {{ (total_votes / total_users * 100) | round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="stat-icon">
+                    <i class="fas fa-percent"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-section">
+            <div class="chart-header">Live Polling Trajectory</div>
+            <div class="chart-wrapper">
+                <canvas id="adminBarChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function confirmReset() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will permanently delete ALL cast votes. You cannot undo this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: 'Yes, reset everything!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('resetVotesForm').submit();
+            }
+        })
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if(params.has('success')) {
+        let msg = '';
+        if(params.get('success') === 'reset') msg = 'All votes have been successfully reset.';
+        if(params.get('success') === 'candidate_added') msg = 'New candidate added successfully.';
+        if(params.get('success') === 'candidate_deleted') msg = 'Candidate removed successfully.';
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Action Completed',
+            text: msg,
+            position: 'top-end',
+            toast: true,
+            showConfirmButton: false,
+            timer: 3500
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    const labels = [
+        {% for c in data %} "{{ c[0] }}", {% endfor %}
+    ];
+    
+    const votes = [
+        {% for c in data %} {{ c[1] }}, {% endfor %}
+    ];
+
+    const ctx = document.getElementById('adminBarChart').getContext('2d');
+    
+    // Gradient for bars
+    let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(0, 242, 254, 0.8)');   
+    gradient.addColorStop(1, 'rgba(74, 144, 226, 0.8)');
+
+    Chart.defaults.color = '#475569';
+    Chart.defaults.font.family = 'Inter';
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Votes Collected',
+                data: votes,
+                backgroundColor: gradient,
+                borderColor: 'rgba(0, 242, 254, 1)',
+                borderWidth: 1,
+                borderRadius: 8,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: { stepSize: 1 }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+{% endblock %}

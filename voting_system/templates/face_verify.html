@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Face Verification{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="/static/face_verify.css">
+{% endblock %}
+
+{% block content %}
+<main class="main-content-wrapper" style="min-height: calc(100vh - 180px); display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
+<div style="width: 100%; display: flex; justify-content: center;">
+<div class="face-box">
+    <i class="fas fa-camera"></i>
+    <h2>Face Verification</h2>
+    <p>Please look at the camera to verify your identity before voting.</p>
+
+    <div class="video-container">
+        <video id="video" autoplay muted playsinline></video>
+        <div class="scan-line" id="scanLine"></div>
+    </div>
+
+    <form method="POST" action="/face_verify" id="verifyForm">
+        <button type="button" id="startBtn" onclick="startVerification()">Start Scan</button>
+    </form>
+</div>
+</div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/app.js"></script>
+<script>
+    const video = document.getElementById('video');
+    const scanLine = document.getElementById('scanLine');
+    const startBtn = document.getElementById('startBtn');
+    const verifyForm = document.getElementById('verifyForm');
+
+    // Access webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+        })
+        .catch(err => {
+            console.error("Error accessing webcam:", err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Camera Access Denied',
+                text: 'Please allow camera access to use face verification.',
+                background: '#ffffff', color: '#1e293b'
+            });
+            startBtn.disabled = true;
+        });
+
+    function startVerification() {
+        startBtn.disabled = true;
+        startBtn.innerText = "Scanning...";
+        scanLine.style.display = "block";
+
+        // Simulate 3 seconds of scanning AI
+        setTimeout(() => {
+            scanLine.style.display = "none";
+            
+            // Stop video stream
+            const stream = video.srcObject;
+            if(stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Face Verified',
+                text: 'Authentication successful. Redirecting to ballot...',
+                background: '#ffffff',
+                color: '#1e293b',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                verifyForm.submit();
+            });
+
+        }, 3000);
+    }
+</script>
+{% endblock %}

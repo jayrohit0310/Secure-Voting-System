@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Election Results{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* Scoped Result specific styles */
+.result-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    min-height: calc(100vh - 180px);
+}
+
+.dashboard {
+    width: 100%;
+    max-width: 1000px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-header h2 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.stats-grid {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background: #ffffff;
+    padding: 20px 30px;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.06);
+    flex: 1;
+    min-width: 200px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.stat-card h3 {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
+.stat-card .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #3b82f6;
+}
+
+.charts-container {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-box {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(0,0,0,0.06);
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+canvas {
+    max-width: 100%;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 14px 35px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37,99,235,0.2);
+}
+
+.back-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(37,99,235,0.3);
+    background: #1d4ed8;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content-wrapper result-page-container">
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <h2>📊 Live Election Results</h2>
+        </div>
+
+        {% if declared %}
+        <div class="stats-grid">
+            {% set total_votes = 0 %}
+            {% for c in data %}
+                <div class="stat-card">
+                    <h3>{{ c[0] }}</h3>
+                    <div class="value">{{ c[1] }}</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-box" style="max-width: 400px;">
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 60px 20px;">
+            <i class="fas fa-lock" style="font-size: 5rem; color: #94a3b8; margin-bottom: 25px;"></i>
+            <h3 style="font-size: 2.2rem; margin-bottom: 15px; color: #1e293b;">Results Not Declared Yet</h3>
+            <p style="color: #64748b; font-size: 1.2rem; max-width: 600px; margin: 0 auto;">The administrator has not made the election results public at this time. Please check back later.</p>
+        </div>
+        {% endif %}
+
+        <div style="text-align: center;">
+            <a href="/" class="back-btn"><i class="fas fa-home"></i> Back to Home</a>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    {% if declared %}
+    // Prepare Data from Flask
+    const labels = [
+        {% for c in data %} "{{ c[0] }}", {% endfor %}
+    ];
+    
+    const votes = [
+        {% for c in data %} {{ c[1] }}, {% endfor %}
+    ];
+
+    // Colors
+    const colors = [
+        'rgba(0, 242, 254, 0.8)',
+        'rgba(74, 207, 115, 0.8)',
+        'rgba(255, 107, 107, 0.8)',
+        'rgba(255, 159, 67, 0.8)'
+    ];
+
+    const borderColors = [
+        'rgba(0, 242, 254, 1)',
+        'rgba(74, 207, 115, 1)',
+        'rgba(255, 107, 107, 1)',
+        'rgba(255, 159, 67, 1)'
+    ];
+
+    Chart.defaults.color = '#475569';
+    Chart.defaults.font.family = 'Inter';
+
+    // Pie Chart
+    const ctxPie = document.getElementById('pieChart').getContext('2d');
+    new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: votes,
+                backgroundColor: colors,
+                borderColor: borderColors,
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Bar Chart
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Votes',
+                data: votes,
+                backgroundColor: colors,
+                borderColor: borderColors,
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { stepSize: 1 }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}

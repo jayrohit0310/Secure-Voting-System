@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Cast Your Vote{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Scoped Vote specific styles */
+.vote-page-container {
+    text-align: center;
+    padding: 50px 20px;
+    min-height: calc(100vh - 180px);
+}
+
+.vote-page-container h1 {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.subtext {
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+    color: #64748b;
+}
+
+.user-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 30px;
+    border-radius: 30px;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.06);
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.user-box i {
+    color: #3b82f6;
+}
+
+.user-box b {
+    color: #1e293b;
+}
+
+.instructions {
+    max-width: 700px;
+    margin: 0 auto 50px;
+    background: #ffffff;
+    padding: 20px 30px;
+    border-radius: 20px;
+    font-size: 1.05rem;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    color: #475569;
+}
+
+.instructions b {
+    color: #3b82f6;
+}
+
+.vote-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.candidate-card {
+    background: #ffffff;
+    width: 300px;
+    border-radius: 24px;
+    padding: 35px 25px;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    color: #334155;
+    transition: all 0.4s ease;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.candidate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.candidate-card img {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #ffffff;
+    margin-bottom: 20px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+}
+
+.candidate-card:hover img {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    border-color: #3b82f6;
+}
+
+.candidate-card h3 {
+    margin: 10px 0 8px;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.candidate-card p {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+.vote-btn {
+    padding: 14px;
+    width: 100%;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37,99,235,0.2);
+}
+
+.vote-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37,99,235,0.3);
+    background: #1d4ed8;
+}
+
+.vote-btn:disabled {
+    background: #94a3b8;
+    color: #ffffff;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="main-content-wrapper vote-page-container">
+    <h1>Cast Your Vote</h1>
+    <p class="subtext">You can vote for ONLY ONE candidate in this election.</p>
+
+    <div class="user-box">
+        <i class="fas fa-user-circle"></i> Logged in as: <b>{{ session['user'] }}</b>
+    </div>
+
+    <div class="instructions">
+        <b><i class="fas fa-info-circle"></i> Instructions:</b> Select your preferred candidate and click the "Vote" button.
+        <span style="color: #ff6b6b; font-weight: bold;">(Warning: You can only vote once per voter profile!)</span>
+    </div>
+
+    <form method="POST" action="/vote" id="voteForm">
+    <div class="vote-wrapper">
+        {% for candidate in candidates %}
+        <div class="candidate-card">
+            <img src="{{ candidate[3] }}" alt="{{ candidate[1] }}">
+            <h3>{{ candidate[1] }}</h3>
+            <p>{{ candidate[2] }}</p>
+            <button class="vote-btn" type="submit" name="candidate" value="{{ candidate[1] }}" onclick="disableButtons(event)">Vote</button>
+        </div>
+        {% endfor %}
+    </div>
+    </form>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function disableButtons(event) {
+    // Only disable to prevent double clicks, form submission continues
+    const buttons = document.querySelectorAll(".vote-btn");
+    buttons.forEach(btn => {
+        if(btn !== event.target) {
+            btn.disabled = true;
+        }
+    });
+    event.target.innerText = "Processing...";
+}
+
+window.onload = function () {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    const success = params.get("success");
+
+    if (error === "already_voted") {
+        Swal.fire({
+            icon: 'error',
+            title: 'Action Denied',
+            text: 'You have already cast your vote! You cannot vote more than once.',
+            background: '#ffffff',
+            color: '#1e293b',
+            confirmButtonColor: '#e74c3c',
+            timer: 3500,
+            timerProgressBar: true
+        }).then(() => {
+            window.location.href = "/result";
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    if (success === "1") {
+        Swal.fire({
+            icon: 'success',
+            title: 'Vote Cast successfully!',
+            text: 'Your vote has been securely recorded. Redirecting to live results...',
+            background: '#ffffff',
+            color: '#1e293b',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+        }).then(() => {
+            window.location.href = "/result";
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+};
+</script>
+{% endblock %}

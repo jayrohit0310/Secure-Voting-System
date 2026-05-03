@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Secure Voting System{% endblock %}
+
+{% block extra_head %}
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <style>
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        .main-content-wrapper {
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+{% endblock %}
+
+{% block background %}
+<div id="particles-js"></div>
+{% endblock %}
+
+{% block content %}
+<main class="main-content-wrapper">
+    <div class="main-container">
+
+        <div class="main-left">
+            <h2>The Future of<br>Democratic Choice</h2>
+            <p>
+                Experience the next generation of secure, fast, and automated digital voting. 
+                Our platform eliminates manual counting and guarantees absolute transparency 
+                through state-of-the-art encryption combined with AI verification protocols.
+            </p>
+
+            <h3>Why choose our system?</h3>
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>Bank-Level Security</h4>
+                    <p>Advanced cryptographic protocols encrypt your choices instantly.</p>
+                </div>
+
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h4>Lightning Fast</h4>
+                    <p>No queues. No waiting. Cast your vote from anywhere globally.</p>
+                </div>
+
+                <div class="feature-card">
+                    <i class="fas fa-fingerprint"></i>
+                    <h4>AI Verification</h4>
+                    <p>Cutting edge facial recognition ensures true one-person-one-vote.</p>
+                </div>
+            </div>
+            <div class="start-vote-container">
+                <a href="/start_voting" class="start-btn">
+                <i class="fas fa-paper-plane"></i> Initialize Secure Vote Process
+                </a>
+            </div>
+        </div>
+
+        <div class="main-right">
+            <div class="vote-icon">
+                <i class="fas fa-fingerprint" style="background: linear-gradient(to bottom, #4facfe, #00f2fe); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"></i>
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize Particles.js
+    particlesJS("particles-js", {
+        "particles": {
+            "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+            "color": { "value": "#00f2fe" },
+            "shape": { "type": "circle" },
+            "opacity": { "value": 0.5, "random": true },
+            "size": { "value": 3, "random": true },
+            "line_linked": {
+                "enable": true,
+                "distance": 150,
+                "color": "#00f2fe",
+                "opacity": 0.3,
+                "width": 1
+            },
+            "move": {
+                "enable": true,
+                "speed": 2,
+                "direction": "none",
+                "random": false,
+                "straight": false,
+                "out_mode": "out",
+                "bounce": false,
+            }
+        },
+        "interactivity": {
+            "detect_on": "canvas",
+            "events": {
+                "onhover": { "enable": true, "mode": "repulse" },
+                "onclick": { "enable": true, "mode": "push" },
+                "resize": true
+            },
+            "modes": {
+                "repulse": { "distance": 100, "duration": 0.4 },
+                "push": { "particles_nb": 4 }
+            }
+        },
+        "retina_detect": true
+    });
+
+    // Handle SweetAlert Notifications safely on load
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        if (urlParams.has('success') && urlParams.get('success') === 'voted') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Vote Completed!',
+                text: 'Your vote has been securely submitted, and you have been logged out automatically for security.',
+                background: '#ffffff',
+                color: '#1e293b',
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'View Live Results'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/result';
+                }
+            });
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        if (urlParams.has('error') && urlParams.get('error') === 'already_voted') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Action Blocked',
+                text: 'You have already voted! Multiple votes from the same account are prohibited.',
+                background: '#ffffff',
+                color: '#1e293b',
+                confirmButtonColor: '#e74c3c'
+            });
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    };
+</script>
+{% endblock %}
